@@ -14,11 +14,10 @@ func CommandlineAppModule(registry types.ServiceRegistry) error {
 }
 
 func configureCommandlineApplication(
-	monitorFactory func() monitor.HealthMonitor) *charmer.CommandLineApplication {
+	monitor monitor.HealthMonitor) *charmer.CommandLineApplication {
 
-	app := charmer.NewCommandLineApplication("", "")
+	app := charmer.NewCommandLineApplication("az-health-exporter", "")
 
-	monitor := monitorFactory()
 	app.AddCommand(commands.NewHealthMonitorCommand(monitor))
 
 	return app
