@@ -23,7 +23,6 @@ type ResourceConfig struct {
 }
 
 type Resource struct {
-	ID            string `yaml:"id"`
 	ResourceGroup string `yaml:"resource_group"`
 	Name          string `yaml:"name"`
 	Type          string `yaml:"type"`

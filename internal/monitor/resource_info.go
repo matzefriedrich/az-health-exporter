@@ -15,7 +15,8 @@ func NewResourceInfo(subscriptionId string, config Resource) *ResourceInfo {
 }
 
 func (r ResourceInfo) ID() string {
-	return r.config.ID
+	const resourceIdTemplate = "/subscriptions/%s/resourceGroups/%s/providers/%s/%s"
+	return fmt.Sprintf(resourceIdTemplate, r.subscriptionId, r.config.ResourceGroup, r.config.Type, r.config.Name)
 }
 
 func (r ResourceInfo) Name() string {
@@ -24,12 +25,4 @@ func (r ResourceInfo) Name() string {
 
 func (r ResourceInfo) Type() string {
 	return r.config.Type
-}
-
-func (r ResourceInfo) Path() string {
-
-	idString := fmt.Sprintf("/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/virtualMachines/%s", r.subscriptionId, r.config.ResourceGroup, r.config.Name)
-	_ = idString
-
-	return ""
 }
