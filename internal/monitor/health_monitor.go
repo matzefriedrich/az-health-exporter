@@ -54,8 +54,11 @@ func NewHealthMonitor(config *Config) (*healthMonitor, error) {
 // StartMonitoring begins periodic health checks
 func (m *healthMonitor) StartMonitoring(ctx context.Context) {
 
-	environment := m.config.Environment
-	duration := time.Duration(environment.PollInterval) * time.Second
+	interval := m.config.Environment.PollInterval
+	if interval == 0 {
+		interval = 60
+	}
+	duration := time.Duration(interval) * time.Second
 	log.Printf("Starting health monitoring (interval: %v)", duration)
 
 	notificationContext, cancel := context.WithCancel(ctx)
@@ -79,6 +82,9 @@ func (m *healthMonitor) StartMonitoring(ctx context.Context) {
 
 func (m *healthMonitor) getConfiguredResources(ctx context.Context) iter.Seq[*ResourceInfo] {
 	return func(yield func(*ResourceInfo) bool) {
+		if m.config.Resources.Resources == nil {
+			return
+		}
 		cancellationContext, cancel := context.WithCancel(ctx)
 		defer cancel()
 		for _, next := range m.config.Resources.Resources {

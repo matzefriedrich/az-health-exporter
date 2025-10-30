@@ -8,13 +8,13 @@ type PrometheusMetrics struct {
 }
 
 type prometheusGaugeVecWrapper struct {
-	PrometheusGaugeVecSetup
-	PrometheusGaugeVec
-
 	gaugeVec    *prometheus.GaugeVec
 	labels      []string
 	labelValues map[ResourceLabel]string
 }
+
+var _ PrometheusGaugeVecSetup = (*prometheusGaugeVecWrapper)(nil)
+var _ PrometheusGaugeVec = (*prometheusGaugeVecWrapper)(nil)
 
 func (p *prometheusGaugeVecWrapper) Register() PrometheusGaugeVec {
 	prometheus.MustRegister(p.gaugeVec)

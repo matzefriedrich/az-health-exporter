@@ -9,11 +9,11 @@ import (
 )
 
 func MonitorModule(registry types.ServiceRegistry) error {
-	registration.RegisterSingleton(registry, healthMonitorFactory)
+	registration.RegisterSingleton(registry, newHealthMonitorFactory())
 	return nil
 }
 
-func healthMonitorFactory() func() monitor.HealthMonitor {
+func newHealthMonitorFactory() func() monitor.HealthMonitor {
 	return func() monitor.HealthMonitor {
 		config, configErr := monitor.LoadConfig()
 		if configErr != nil {
