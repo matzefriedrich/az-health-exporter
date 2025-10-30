@@ -30,13 +30,14 @@ type HealthMonitor interface {
 // NewHealthMonitor creates a new health monitor instance
 func NewHealthMonitor(config *Config) (*healthMonitor, error) {
 
-	cred, err := azidentity.NewDefaultAzureCredential(nil)
+	environment := config.Environment
+	credential, err := azidentity.NewClientSecretCredential(environment.TenantID, environment.ClientID, environment.ClientSecret, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create credential: %w", err)
 	}
 
-	subscriptionID := config.Environment.SubscriptionID
-	client, err := armresourcehealth.NewAvailabilityStatusesClient(subscriptionID, cred, nil)
+	subscriptionID := environment.SubscriptionID
+	client, err := armresourcehealth.NewAvailabilityStatusesClient(subscriptionID, credential, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create client: %w", err)
 	}

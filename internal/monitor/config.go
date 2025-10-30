@@ -16,6 +16,9 @@ type EnvConfig struct {
 	SubscriptionID             string `env:"AZURE_SUBSCRIPTION_ID,required"`
 	PollInterval               int    `env:"POLL_INTERVAL_SECONDS"`
 	ResourcesConfigurationFile string `env:"RESOURCES_CONFIG_FILE,required,file"`
+	TenantID                   string `env:"AZURE_TENANT_ID,required"`
+	ClientID                   string `env:"AZURE_CLIENT_ID,required"`
+	ClientSecret               string `env:"AZURE_CLIENT_SECRET,required"`
 }
 
 type ResourceConfig struct {

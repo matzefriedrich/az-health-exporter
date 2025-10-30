@@ -39,7 +39,7 @@ func newPrometheusGaugeVecWrapper(name PrometheusMetricName, help string, labels
 }
 
 func (p *prometheusGaugeVecWrapper) Set(value float64) {
-	values := make([]string, len(p.labels))
+	values := make([]string, 0)
 	for _, label := range p.labels {
 		resourceLabel := ResourceLabel(label)
 		v, found := p.labelValues[resourceLabel]
