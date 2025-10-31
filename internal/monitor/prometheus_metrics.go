@@ -9,7 +9,7 @@ type PrometheusMetrics struct {
 
 type prometheusGaugeVecWrapper struct {
 	gaugeVec    *prometheus.GaugeVec
-	labels      []string
+	labels      []ResourceLabel
 	labelValues map[ResourceLabel]string
 }
 
@@ -30,10 +30,14 @@ type PrometheusGaugeVec interface {
 	Set(value float64)
 }
 
-func newPrometheusGaugeVecWrapper(name PrometheusMetricName, help string, labels ...string) PrometheusGaugeVecSetup {
+func newPrometheusGaugeVecWrapper(name PrometheusMetricName, help string, labels ...ResourceLabel) PrometheusGaugeVecSetup {
 	opts := prometheus.GaugeOpts{Name: string(name), Help: help}
+	labelsAsStrings := make([]string, 0)
+	for _, label := range labels {
+		labelsAsStrings = append(labelsAsStrings, string(label))
+	}
 	return &prometheusGaugeVecWrapper{
-		gaugeVec: prometheus.NewGaugeVec(opts, labels),
+		gaugeVec: prometheus.NewGaugeVec(opts, labelsAsStrings),
 		labels:   labels,
 	}
 }
@@ -102,8 +106,8 @@ const (
 )
 
 func registerPrometheusMetrics() (*PrometheusMetrics, error) {
-	healthyGauge := newPrometheusGaugeVecWrapper(AzureResourceHealthStatus, "Azure resource health status (1 = healthy, 0 = unhealthy)", "resource_id", "resource_name", "resource_type", "availability_state").Register()
-	lastCheckGauge := newPrometheusGaugeVecWrapper(AzureResourceHealthLastCheckTimestamp, "Timestamp of last health check", "resource_id", "resource_name").Register()
+	healthyGauge := newPrometheusGaugeVecWrapper(AzureResourceHealthStatus, "Azure resource health status (1 = healthy, 0 = unhealthy)", ResourceID, ResourceName, ResourceType, AvailabilityState).Register()
+	lastCheckGauge := newPrometheusGaugeVecWrapper(AzureResourceHealthLastCheckTimestamp, "Timestamp of last health check", ResourceID, ResourceName).Register()
 	return &PrometheusMetrics{
 		healthyGauge:   healthyGauge,
 		lastCheckGauge: lastCheckGauge,
