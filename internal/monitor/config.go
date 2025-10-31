@@ -2,6 +2,8 @@ package monitor
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 
 	"github.com/caarlos0/env/v11"
 	"github.com/goccy/go-yaml"
@@ -15,7 +17,7 @@ type Config struct {
 type EnvConfig struct {
 	SubscriptionID             string `env:"AZURE_SUBSCRIPTION_ID,required"`
 	PollInterval               int    `env:"POLL_INTERVAL_SECONDS"`
-	ResourcesConfigurationFile string `env:"RESOURCES_CONFIG_FILE,required,file"`
+	ResourcesConfigurationFile string `env:"RESOURCES_CONFIG_FILE,required"`
 	TenantID                   string `env:"AZURE_TENANT_ID,required"`
 	ClientID                   string `env:"AZURE_CLIENT_ID,required"`
 	ClientSecret               string `env:"AZURE_CLIENT_SECRET,required"`
@@ -40,8 +42,17 @@ func LoadConfig() (*Config, error) {
 		return nil, fmt.Errorf("failed to parse config: %w", configErr)
 	}
 
+	absoluteConfigurationFilePath, _ := filepath.Abs(config.ResourcesConfigurationFile)
+	if _, err := os.Stat(absoluteConfigurationFilePath); os.IsNotExist(err) {
+		return nil, fmt.Errorf("resources config file does not exist: %w", err)
+	}
+
+	yamlBuffer, readErr := os.ReadFile(absoluteConfigurationFilePath)
+	if readErr != nil {
+		return nil, fmt.Errorf("failed to read resources config file: %w", readErr)
+	}
+
 	resourceConfig := ResourceConfig{}
-	yamlBuffer := []byte(config.ResourcesConfigurationFile)
 	yamlErr := yaml.Unmarshal(yamlBuffer, &resourceConfig)
 	if yamlErr != nil {
 		return nil, fmt.Errorf("failed to parse resources config: %w", yamlErr)
