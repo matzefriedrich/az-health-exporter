@@ -12,6 +12,7 @@ import (
 	"github.com/matzefriedrich/az-health-exporter/internal/monitor"
 	"github.com/matzefriedrich/cobra-extensions/pkg/commands"
 	"github.com/matzefriedrich/cobra-extensions/pkg/types"
+	"github.com/matzefriedrich/parsley/pkg/features"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/spf13/cobra"
 )
@@ -20,14 +21,14 @@ type healthMonitorCommand struct {
 	use  types.CommandName `flag:"monitor" short:"Runs the resource monitor server"`
 	Port int               `flag:"p" short:"The listening port of the monitoring server"`
 
-	healthMonitor monitor.HealthMonitor
+	healthMonitor features.Lazy[monitor.HealthMonitor]
 	mu            sync.RWMutex
 }
 
 var _ types.TypedCommand = (*healthMonitorCommand)(nil)
 
 func NewHealthMonitorCommand(
-	healthMonitor monitor.HealthMonitor) *cobra.Command {
+	healthMonitor features.Lazy[monitor.HealthMonitor]) *cobra.Command {
 	instance := &healthMonitorCommand{
 		healthMonitor: healthMonitor,
 		mu:            sync.RWMutex{},
@@ -35,15 +36,16 @@ func NewHealthMonitorCommand(
 	return commands.CreateTypedCommand(instance)
 }
 
-func (h *healthMonitorCommand) Execute(ctx context.Context) {
+func (m *healthMonitorCommand) Execute(ctx context.Context) {
 
-	go h.healthMonitor.StartMonitoring(ctx)
+	monitor := m.healthMonitor.Value()
+	go monitor.StartMonitoring(ctx)
 
 	http.HandleFunc("/health", healthCheckHandler)
-	http.HandleFunc("/status", h.statusHandler)
+	http.HandleFunc("/status", m.statusHandler)
 	http.Handle("/metrics", promhttp.Handler())
 
-	addr := fmt.Sprintf(":%d", h.Port)
+	addr := fmt.Sprintf(":%d", m.Port)
 	log.Printf("Starting server on %s (listening on all interfaces)", addr)
 	log.Printf("Endpoints:")
 	log.Printf("  - Health Check: %s/health", addr)
@@ -61,8 +63,10 @@ func (m *healthMonitorCommand) statusHandler(w http.ResponseWriter, request *htt
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
+	healthMonitor := m.healthMonitor.Value()
+
 	statuses := make([]*monitor.ResourceHealth, 0)
-	healthStatus, err := m.healthMonitor.GetHealthStatus(request.Context())
+	healthStatus, err := healthMonitor.GetHealthStatus(request.Context())
 	if err != nil {
 		log.Printf("Failed to get health status: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
