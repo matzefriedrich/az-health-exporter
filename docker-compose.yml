@@ -1,0 +1,51 @@
+services:
+
+  az-health-exporter:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: az-health-exporter:local
+    container_name: az-health-exporter
+
+    ports:
+      - "8080:8080"
+
+    environment:
+      # Required Azure credentials
+      AZURE_TENANT_ID: ${AZURE_TENANT_ID}
+      AZURE_CLIENT_ID: ${AZURE_CLIENT_ID}
+      AZURE_CLIENT_SECRET: ${AZURE_CLIENT_SECRET}
+      AZURE_SUBSCRIPTION_ID: ${AZURE_SUBSCRIPTION_ID}
+      # Resources config file inside the container
+      RESOURCES_CONFIG_FILE: /config/resources.yaml
+      # Optional polling interval (seconds)
+      POLL_INTERVAL_SECONDS: ${POLL_INTERVAL_SECONDS:-60}
+
+    volumes:
+      - ./config/sample.config.yaml:/config/resources.yaml:ro
+
+    networks:
+      - monitor
+
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:v3.7.3
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.enable-lifecycle
+    depends_on:
+      - az-health-exporter
+    networks:
+      - monitor
+    restart: unless-stopped
+
+networks:
+  monitor:
+    name: az-health-monitor
