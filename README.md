@@ -99,6 +99,18 @@ az-health-exporter monitor --p 8080
 
 The exporter publishes Prometheus metrics for the configured resources. Scrape the `/metrics` endpoint from Prometheus. Configure your Prometheus server with a job pointing at the host/port you run the exporter on.
 
+### Example metrics
+
+```
+# HELP azure_resource_health_status Azure resource health status (1 = healthy, 0 = unhealthy)
+# TYPE azure_resource_health_status gauge
+azure_resource_health_status{resource_id="...",resource_name="...",resource_type="...",availability_state="Available"} 1
+
+# HELP azure_resource_health_last_check_timestamp Timestamp of last health check
+# TYPE azure_resource_health_last_check_timestamp gauge
+azure_resource_health_last_check_timestamp{resource_id="...",resource_name="..."} 1.6984752e+09
+```
+
 ---
 
 Copyright 2025 by Matthias Friedrich
