@@ -30,4 +30,4 @@ COPY --from=builder /out/az-health-exporter .
 
 USER nonroot:nonroot
 
-ENTRYPOINT ["/usr/local/bin/az-health-exporter", "monitor", "--p", "8080"]
+ENTRYPOINT ["./az-health-exporter", "monitor", "--p", "8080"]
