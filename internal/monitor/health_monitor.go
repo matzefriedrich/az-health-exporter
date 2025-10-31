@@ -25,6 +25,7 @@ type healthMonitor struct {
 
 type HealthMonitor interface {
 	StartMonitoring(ctx context.Context)
+	GetHealthStatus(_ context.Context) ([]*ResourceHealth, error)
 }
 
 // NewHealthMonitor creates a new health monitor instance
@@ -141,9 +142,9 @@ func (m *healthMonitor) checkResourceHealth(ctx context.Context, resource *Resou
 	}
 
 	return &ResourceHealth{
-		ResourceID:        id,
-		ResourceName:      resource.Name(),
-		ResourceType:      resource.Type(),
+		ID:                id,
+		Name:              resource.Name(),
+		Type:              resource.Type(),
 		AvailabilityState: availabilityState,
 		Summary:           summary,
 		ReasonType:        reasonType,
@@ -152,11 +153,21 @@ func (m *healthMonitor) checkResourceHealth(ctx context.Context, resource *Resou
 	}, nil
 }
 
+func (m *healthMonitor) GetHealthStatus(_ context.Context) ([]*ResourceHealth, error) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	results := make([]*ResourceHealth, 0)
+	for _, status := range m.healthStatus {
+		results = append(results, status)
+	}
+	return results, nil
+}
+
 func (m *healthMonitor) updateHealthStatus(health *ResourceHealth) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
-	m.healthStatus[health.ResourceID] = health
+	m.healthStatus[health.ID] = health
 
 	// Update Prometheus metrics
 	healthValue := 0.0
@@ -165,20 +176,20 @@ func (m *healthMonitor) updateHealthStatus(health *ResourceHealth) {
 	}
 
 	m.prometheusMetrics.healthyGauge.WithLabelValues(
-		withResourceID(health.ResourceID),
-		withResourceName(health.ResourceName),
-		withResourceType(health.ResourceType),
+		withResourceID(health.ID),
+		withResourceName(health.Name),
+		withResourceType(health.Type),
 		withAvailabilityState(health.AvailabilityState)).
 		Set(healthValue)
 
 	lastUpdateUnixTimestamp := float64(health.LastUpdated.Unix())
 	m.prometheusMetrics.lastCheckGauge.WithLabelValues(
-		withResourceID(health.ResourceID),
-		withResourceName(health.ResourceName)).
+		withResourceID(health.ID),
+		withResourceName(health.Name)).
 		Set(lastUpdateUnixTimestamp)
 
 	log.Printf("Updated: %s - %s (%s)",
-		health.ResourceName,
+		health.Name,
 		health.AvailabilityState,
 		health.Summary)
 }
