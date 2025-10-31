@@ -2,6 +2,7 @@ package internal
 
 import (
 	"fmt"
+	"strings"
 )
 
 var (
@@ -19,9 +20,16 @@ var (
 )
 
 func GetInformativeApplicationName() string {
-	name := "az-health-exporter"
 	if ReleaseName != "" && Version != "" {
-		name = fmt.Sprintf("%s, %s-%s (%s)", ReleaseName, Version, CommitSha, ReleaseDate)
+		buffer := strings.Builder{}
+		buffer.WriteString(fmt.Sprintf("%s, %s", ReleaseName, Version))
+		if CommitSha != "" {
+			buffer.WriteString(fmt.Sprintf("-%s", CommitSha))
+		}
+		if ReleaseDate != "" {
+			buffer.WriteString(fmt.Sprintf(" (%s)", ReleaseDate))
+		}
+		return buffer.String()
 	}
-	return name
+	return "az-health-exporter"
 }
