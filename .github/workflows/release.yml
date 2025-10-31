@@ -1,0 +1,74 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches-ignore:
+      - feature/*
+      - fix/*
+    tags:
+      - "v*"
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - uses: actions/checkout@v4
+
+      - name: Check if tag is on main branch
+        id: check-branch
+        run: |
+
+          # Verify this is actually a tag push (should be true given our trigger)
+          if [[ ! "${{ github.ref }}" =~ ^refs/tags/ ]]; then
+            echo "Not a tag push, skipping"
+            echo "continue=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Get the commit hash that the tag points to
+          TAG_COMMIT=$(git rev-list -n 1 ${{ github.ref }})
+          echo "Tag ${{ github.ref_name }} points to commit: $TAG_COMMIT"
+          
+          # Check if this commit exists in the main branch
+          BRANCH_NAME=$(git branch -r --contains "$TAG_COMMIT" | grep -Eo 'origin/main' | head -n 1)
+          if [ "$BRANCH_NAME" != "origin/main" ]; then 
+            echo "Tag ${{ github.ref_name }} points to a commit on main branch"
+            echo "continue=true" >> $GITHUB_OUTPUT
+          else
+            echo "Tag ${{ github.ref_name }} does not point to a commit on main branch"
+            echo "continue=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build the Docker image
+        run: |
+
+          APP_RELEASE_DATE=$(date -u +%Y-%m-%d)
+          APP_VERSION=${{ github.ref_name }}
+          IMAGE_NAME="mobymatze/az-health-exporter"
+
+          docker build \
+            --build-arg APP_RELEASE_DATE="$APP_RELEASE_DATE" \
+            --build-arg APP_RELEASE="$GITHUB_REPOSITORY" \
+            --build-arg APP_VERSION="$APP_VERSION" \
+            --build-arg CI_COMMIT_SHORT_SHA="$GITHUB_SHA" \
+            -t "$IMAGE_NAME:$APP_VERSION" \
+            -f Dockerfile .
+           
+      - name: Login to Docker Hub
+        if: steps.check-branch.outputs.continue == 'true'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_SECRET }}
+
+      - name: Push Docker image
+        if: steps.check-branch.outputs.continue == 'true'
+        run: |
+          IMAGE_NAME="mobymatze/az-health-exporter"
+          APP_VERSION=${{ github.ref_name }}
+
+          docker push "$IMAGE_NAME:$APP_VERSION"
