@@ -8,8 +8,10 @@ import (
 	"sync"
 	"time"
 
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcehealth/armresourcehealth"
+	"github.com/AzureAD/microsoft-authentication-library-for-go/apps/errors"
 )
 
 // healthMonitor manages resource health monitoring
@@ -19,6 +21,8 @@ type healthMonitor struct {
 	healthStatus      map[string]*ResourceHealth
 	mu                sync.RWMutex
 	prometheusMetrics *PrometheusMetrics
+
+	skipUnsupportedResourceTypes map[string]struct{}
 }
 
 type HealthMonitor interface {
@@ -44,10 +48,11 @@ func NewHealthMonitor(config *Config) (HealthMonitor, error) {
 	prometheusMetrics, _ := registerPrometheusMetrics()
 
 	return &healthMonitor{
-		client:            client,
-		config:            config,
-		healthStatus:      make(map[string]*ResourceHealth),
-		prometheusMetrics: prometheusMetrics,
+		client:                       client,
+		config:                       config,
+		healthStatus:                 make(map[string]*ResourceHealth),
+		prometheusMetrics:            prometheusMetrics,
+		skipUnsupportedResourceTypes: make(map[string]struct{}),
 	}, nil
 }
 
@@ -103,9 +108,22 @@ func (m *healthMonitor) checkAllResources(ctx context.Context) {
 	log.Println("Checking resource health...")
 	resources := m.getConfiguredResources(ctx)
 	for resource := range resources {
+		resourceType := resource.Type()
+		if _, skip := m.skipUnsupportedResourceTypes[resourceType]; skip {
+			continue
+		}
 		health, err := m.checkResourceHealth(ctx, resource)
 		if err != nil {
 			log.Printf("Error checking %s: %v", resource.Name(), err)
+			var responseErr *azcore.ResponseError
+			if errors.As(err, &responseErr); responseErr != nil {
+				switch responseErr.StatusCode {
+				case 422:
+					m.skipUnsupportedResourceTypes[resourceType] = struct{}{}
+					log.Printf("Disabled unsupported resource type: %s; won´t check again.", resourceType)
+					continue
+				}
+			}
 			continue
 		}
 		m.updateHealthStatus(health)
