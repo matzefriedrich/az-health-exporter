@@ -29,7 +29,7 @@ type HealthMonitor interface {
 }
 
 // NewHealthMonitor creates a new health monitor instance
-func NewHealthMonitor(config *Config) (*healthMonitor, error) {
+func NewHealthMonitor(config *Config) (HealthMonitor, error) {
 
 	environment := config.Environment
 	credential, err := azidentity.NewClientSecretCredential(environment.TenantID, environment.ClientID, environment.ClientSecret, nil)
@@ -196,8 +196,13 @@ func (m *healthMonitor) updateHealthStatus(health *ResourceHealth) {
 		health.Summary)
 }
 
+type statusResponse struct {
+	Timestamp time.Time         `json:"timestamp"`
+	Resources []*ResourceHealth `json:"resources"`
+}
+
 // statusHandler returns current health status for all resources
-func (m *healthMonitor) statusHandler(w http.ResponseWriter, r *http.Request) {
+func (m *healthMonitor) statusHandler(w http.ResponseWriter, _ *http.Request) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
@@ -207,8 +212,9 @@ func (m *healthMonitor) statusHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"timestamp": time.Now(),
-		"resources": statuses,
+	encoder := json.NewEncoder(w)
+	_ = encoder.Encode(&statusResponse{
+		Timestamp: time.Now(),
+		Resources: statuses,
 	})
 }
