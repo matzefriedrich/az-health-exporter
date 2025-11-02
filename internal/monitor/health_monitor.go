@@ -2,11 +2,9 @@ package monitor
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"iter"
 	"log"
-	"net/http"
 	"sync"
 	"time"
 
@@ -29,7 +27,7 @@ type HealthMonitor interface {
 }
 
 // NewHealthMonitor creates a new health monitor instance
-func NewHealthMonitor(config *Config) (*healthMonitor, error) {
+func NewHealthMonitor(config *Config) (HealthMonitor, error) {
 
 	environment := config.Environment
 	credential, err := azidentity.NewClientSecretCredential(environment.TenantID, environment.ClientID, environment.ClientSecret, nil)
@@ -118,12 +116,12 @@ func (m *healthMonitor) checkAllResources(ctx context.Context) {
 func (m *healthMonitor) checkResourceHealth(ctx context.Context, resource *ResourceInfo) (*ResourceHealth, error) {
 
 	id := resource.ID()
-	resp, err := m.client.GetByResource(ctx, id, nil)
+	resourceResponse, err := m.client.GetByResource(ctx, id, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get health status: %w", err)
 	}
 
-	status := resp.AvailabilityStatus
+	status := resourceResponse.AvailabilityStatus
 	availabilityState := "Unknown"
 	if status.Properties.AvailabilityState != nil {
 		availabilityState = string(*status.Properties.AvailabilityState)
@@ -148,6 +146,7 @@ func (m *healthMonitor) checkResourceHealth(ctx context.Context, resource *Resou
 		AvailabilityState: availabilityState,
 		Summary:           summary,
 		ReasonType:        reasonType,
+		ResourceGroup:     resource.ResourceGroup(),
 		LastUpdated:       time.Now(),
 		Healthy:           healthy,
 	}, nil
@@ -176,6 +175,7 @@ func (m *healthMonitor) updateHealthStatus(health *ResourceHealth) {
 	}
 
 	m.prometheusMetrics.healthyGauge.WithLabelValues(
+		withResourceGroup(health.ResourceGroup),
 		withResourceID(health.ID),
 		withResourceName(health.Name),
 		withResourceType(health.Type),
@@ -192,21 +192,4 @@ func (m *healthMonitor) updateHealthStatus(health *ResourceHealth) {
 		health.Name,
 		health.AvailabilityState,
 		health.Summary)
-}
-
-// statusHandler returns current health status for all resources
-func (m *healthMonitor) statusHandler(w http.ResponseWriter, r *http.Request) {
-	m.mu.RLock()
-	defer m.mu.RUnlock()
-
-	statuses := make([]*ResourceHealth, 0, len(m.healthStatus))
-	for _, status := range m.healthStatus {
-		statuses = append(statuses, status)
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"timestamp": time.Now(),
-		"resources": statuses,
-	})
 }

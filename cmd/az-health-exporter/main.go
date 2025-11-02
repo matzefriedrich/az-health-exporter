@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"context"
+	"io/fs"
 	"log"
 
 	"github.com/matzefriedrich/az-health-exporter/internal"
@@ -19,8 +20,8 @@ func main() {
 	log.Println(internal.GetInformativeApplicationName())
 
 	registry := registration.NewServiceRegistry()
-	registry.RegisterModule(modules.CommandlineAppModule)
-	registry.RegisterModule(modules.MonitorModule)
+	_ = registry.RegisterModule(modules.CommandlineAppModule)
+	_ = registry.RegisterModule(modules.MonitorModule)
 	resolver := resolving.NewResolver(registry)
 
 	ctx := context.Background()
@@ -35,7 +36,9 @@ func main() {
 
 func printBanner() {
 	bannerFile, _ := resources.Resources.Open(resources.BannerTxt)
-	defer bannerFile.Close()
+	defer func(bannerFile fs.File) {
+		_ = bannerFile.Close()
+	}(bannerFile)
 	scanner := bufio.NewScanner(bannerFile)
 	for scanner.Scan() {
 		line := scanner.Text()

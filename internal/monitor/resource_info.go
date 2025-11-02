@@ -14,6 +14,10 @@ func NewResourceInfo(subscriptionId string, config Resource) *ResourceInfo {
 	}
 }
 
+func (r ResourceInfo) ResourceGroup() string {
+	return r.config.ResourceGroup
+}
+
 func (r ResourceInfo) ID() string {
 	const resourceIdTemplate = "/subscriptions/%s/resourceGroups/%s/providers/%s/%s"
 	return fmt.Sprintf(resourceIdTemplate, r.subscriptionId, r.config.ResourceGroup, r.config.Type, r.config.Name)

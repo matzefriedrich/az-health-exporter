@@ -38,8 +38,8 @@ func NewHealthMonitorCommand(
 
 func (m *healthMonitorCommand) Execute(ctx context.Context) {
 
-	monitor := m.healthMonitor.Value()
-	go monitor.StartMonitoring(ctx)
+	healthMonitor := m.healthMonitor.Value()
+	go healthMonitor.StartMonitoring(ctx)
 
 	http.HandleFunc("/health", healthCheckHandler)
 	http.HandleFunc("/status", m.statusHandler)
@@ -59,6 +59,11 @@ func (m *healthMonitorCommand) Execute(ctx context.Context) {
 
 }
 
+type statusResponse struct {
+	Timestamp time.Time                 `json:"timestamp"`
+	Resources []*monitor.ResourceHealth `json:"resources"`
+}
+
 func (m *healthMonitorCommand) statusHandler(w http.ResponseWriter, request *http.Request) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
@@ -75,14 +80,15 @@ func (m *healthMonitorCommand) statusHandler(w http.ResponseWriter, request *htt
 	for _, status := range healthStatus {
 		statuses = append(statuses, status)
 	}
+	response := &statusResponse{
+		Timestamp: time.Now(),
+		Resources: statuses,
+	}
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"timestamp": time.Now(),
-		"resources": statuses,
-	})
+	_ = json.NewEncoder(w).Encode(response)
 }
 
-func healthCheckHandler(w http.ResponseWriter, r *http.Request) {
+func healthCheckHandler(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{
 		"status": "healthy",

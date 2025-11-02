@@ -11,7 +11,7 @@ import (
 )
 
 func CommandlineAppModule(registry types.ServiceRegistry) error {
-	registration.RegisterSingleton(registry, configureCommandlineApplication)
+	_ = registration.RegisterSingleton(registry, configureCommandlineApplication)
 	return nil
 }
 

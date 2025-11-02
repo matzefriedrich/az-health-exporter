@@ -18,9 +18,9 @@ func newHealthMonitorFactory() monitor.HealthMonitor {
 	if configErr != nil {
 		log.Fatalf("failed to load config: %v", configErr)
 	}
-	monitor, err := monitor.NewHealthMonitor(config)
+	healthMonitor, err := monitor.NewHealthMonitor(config)
 	if err != nil {
-		log.Fatalf("failed to create health monitor: %v", err)
+		log.Fatalf("failed to create health healthMonitor: %v", err)
 	}
-	return monitor
+	return healthMonitor
 }
