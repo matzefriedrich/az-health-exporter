@@ -2,11 +2,9 @@ package monitor
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"iter"
 	"log"
-	"net/http"
 	"sync"
 	"time"
 
@@ -194,27 +192,4 @@ func (m *healthMonitor) updateHealthStatus(health *ResourceHealth) {
 		health.Name,
 		health.AvailabilityState,
 		health.Summary)
-}
-
-type statusResponse struct {
-	Timestamp time.Time         `json:"timestamp"`
-	Resources []*ResourceHealth `json:"resources"`
-}
-
-// statusHandler returns current health status for all resources
-func (m *healthMonitor) statusHandler(w http.ResponseWriter, _ *http.Request) {
-	m.mu.RLock()
-	defer m.mu.RUnlock()
-
-	statuses := make([]*ResourceHealth, 0, len(m.healthStatus))
-	for _, status := range m.healthStatus {
-		statuses = append(statuses, status)
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	encoder := json.NewEncoder(w)
-	_ = encoder.Encode(&statusResponse{
-		Timestamp: time.Now(),
-		Resources: statuses,
-	})
 }
