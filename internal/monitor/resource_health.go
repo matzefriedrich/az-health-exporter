@@ -12,4 +12,5 @@ type ResourceHealth struct {
 	ReasonType        string    `json:"reasonType,omitempty"`
 	LastUpdated       time.Time `json:"lastUpdated"`
 	Healthy           bool      `json:"healthy"`
+	ResourceGroup     string    `json:"resourceGroup"`
 }

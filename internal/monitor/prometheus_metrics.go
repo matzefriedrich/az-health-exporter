@@ -45,7 +45,7 @@ func newPrometheusGaugeVecWrapper(name PrometheusMetricName, help string, labels
 func (p *prometheusGaugeVecWrapper) Set(value float64) {
 	values := make([]string, 0)
 	for _, label := range p.labels {
-		resourceLabel := ResourceLabel(label)
+		resourceLabel := label
 		v, found := p.labelValues[resourceLabel]
 		if !found {
 			v = ""
@@ -58,33 +58,36 @@ func (p *prometheusGaugeVecWrapper) Set(value float64) {
 type ResourceLabel string
 
 const (
+	AvailabilityState ResourceLabel = "availability_state"
+	ResourceGroup     ResourceLabel = "resource_group"
 	ResourceID        ResourceLabel = "resource_id"
 	ResourceName      ResourceLabel = "resource_name"
 	ResourceType      ResourceLabel = "resource_type"
-	AvailabilityState ResourceLabel = "availability_state"
 )
 
+func withResourceGroup(resourceGroup string) func() (ResourceLabel, string) {
+	return with(ResourceGroup, resourceGroup)
+}
+
 func withResourceID(resourceID string) func() (ResourceLabel, string) {
-	return func() (ResourceLabel, string) {
-		return ResourceID, resourceID
-	}
+	return with(ResourceID, resourceID)
 }
 
 func withResourceName(resourceName string) func() (ResourceLabel, string) {
-	return func() (ResourceLabel, string) {
-		return ResourceName, resourceName
-	}
+	return with(ResourceName, resourceName)
 }
 
 func withResourceType(resourceType string) func() (ResourceLabel, string) {
-	return func() (ResourceLabel, string) {
-		return ResourceType, resourceType
-	}
+	return with(ResourceType, resourceType)
 }
 
 func withAvailabilityState(availabilityState string) func() (ResourceLabel, string) {
+	return with(AvailabilityState, availabilityState)
+}
+
+func with(resourceLabel ResourceLabel, value string) func() (ResourceLabel, string) {
 	return func() (ResourceLabel, string) {
-		return AvailabilityState, availabilityState
+		return resourceLabel, value
 	}
 }
 
@@ -106,8 +109,8 @@ const (
 )
 
 func registerPrometheusMetrics() (*PrometheusMetrics, error) {
-	healthyGauge := newPrometheusGaugeVecWrapper(AzureResourceHealthStatus, "Azure resource health status (1 = healthy, 0 = unhealthy)", ResourceID, ResourceName, ResourceType, AvailabilityState).Register()
-	lastCheckGauge := newPrometheusGaugeVecWrapper(AzureResourceHealthLastCheckTimestamp, "Timestamp of last health check", ResourceID, ResourceName).Register()
+	healthyGauge := newPrometheusGaugeVecWrapper(AzureResourceHealthStatus, "Azure resource health status (1 = healthy, 0 = unhealthy)", ResourceID, ResourceGroup, ResourceName, ResourceType, AvailabilityState).Register()
+	lastCheckGauge := newPrometheusGaugeVecWrapper(AzureResourceHealthLastCheckTimestamp, "Timestamp of last health check", ResourceID, ResourceGroup, ResourceName).Register()
 	return &PrometheusMetrics{
 		healthyGauge:   healthyGauge,
 		lastCheckGauge: lastCheckGauge,

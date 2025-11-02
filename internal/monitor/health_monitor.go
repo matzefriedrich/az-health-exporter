@@ -118,12 +118,12 @@ func (m *healthMonitor) checkAllResources(ctx context.Context) {
 func (m *healthMonitor) checkResourceHealth(ctx context.Context, resource *ResourceInfo) (*ResourceHealth, error) {
 
 	id := resource.ID()
-	resp, err := m.client.GetByResource(ctx, id, nil)
+	resourceResponse, err := m.client.GetByResource(ctx, id, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get health status: %w", err)
 	}
 
-	status := resp.AvailabilityStatus
+	status := resourceResponse.AvailabilityStatus
 	availabilityState := "Unknown"
 	if status.Properties.AvailabilityState != nil {
 		availabilityState = string(*status.Properties.AvailabilityState)
@@ -148,6 +148,7 @@ func (m *healthMonitor) checkResourceHealth(ctx context.Context, resource *Resou
 		AvailabilityState: availabilityState,
 		Summary:           summary,
 		ReasonType:        reasonType,
+		ResourceGroup:     resource.ResourceGroup(),
 		LastUpdated:       time.Now(),
 		Healthy:           healthy,
 	}, nil
@@ -176,6 +177,7 @@ func (m *healthMonitor) updateHealthStatus(health *ResourceHealth) {
 	}
 
 	m.prometheusMetrics.healthyGauge.WithLabelValues(
+		withResourceGroup(health.ResourceGroup),
 		withResourceID(health.ID),
 		withResourceName(health.Name),
 		withResourceType(health.Type),
