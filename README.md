@@ -40,7 +40,7 @@ go build -o az-health-exporter ./cmd/az-health-exporter
 
 **Option 3** - build a Docker image
 ```sh
-docker build --rm -t mobymatze/az-health-monitor -f Dockerfile .
+docker build --rm -t mobymatze/az-health-exporter -f Dockerfile .
 ```
 
 ## Configuration
