@@ -3,20 +3,20 @@ module github.com/matzefriedrich/az-health-exporter
 go 1.25.3
 
 require (
+	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.19.1
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.13.0
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcehealth/armresourcehealth v1.3.0
+	github.com/AzureAD/microsoft-authentication-library-for-go v1.5.0
 	github.com/caarlos0/env/v11 v11.3.1
 	github.com/goccy/go-yaml v1.18.0
 	github.com/matzefriedrich/cobra-extensions v0.6.0
-	github.com/matzefriedrich/parsley v1.2.1
+	github.com/matzefriedrich/parsley v1.3.0
 	github.com/prometheus/client_golang v1.23.2
 	github.com/spf13/cobra v1.10.1
 )
 
 require (
-	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.19.1 // indirect
 	github.com/Azure/azure-sdk-for-go/sdk/internal v1.11.2 // indirect
-	github.com/AzureAD/microsoft-authentication-library-for-go v1.5.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.7 // indirect
