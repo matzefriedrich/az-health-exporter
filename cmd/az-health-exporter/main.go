@@ -26,7 +26,7 @@ func main() {
 
 	ctx := context.Background()
 	resolverContext := resolving.NewScopedContext(ctx)
-	app, _ := resolving.ResolveRequiredService[*charmer.CommandLineApplication](resolver, resolverContext)
+	app, _ := resolving.ResolveRequiredService[*charmer.CommandLineApplication](resolverContext, resolver)
 
 	err := app.Execute(resolverContext)
 	if err != nil {
