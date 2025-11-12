@@ -9,14 +9,16 @@ on:
       - "v*"
 
 jobs:
-
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-
       - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.25.3'
 
       - name: Check if tag is on main branch
         id: check-branch
@@ -32,7 +34,7 @@ jobs:
           # Get the commit hash that the tag points to
           TAG_COMMIT=$(git rev-list -n 1 ${{ github.ref }})
           echo "Tag ${{ github.ref_name }} points to commit: $TAG_COMMIT"
-          
+
           # Check if this commit exists in the main branch
           BRANCH_NAME=$(git branch -r --contains "$TAG_COMMIT" | grep -Eo 'origin/main' | head -n 1)
           if [ "$BRANCH_NAME" != "origin/main" ]; then 
@@ -44,6 +46,7 @@ jobs:
           fi
 
       - name: Build the Docker image
+        id: docker-build
         run: |
 
           APP_RELEASE_DATE=$(date -u +%Y-%m-%d)
@@ -57,7 +60,9 @@ jobs:
             --build-arg CI_COMMIT_SHORT_SHA="$GITHUB_SHA" \
             -t "$IMAGE_NAME:$APP_VERSION" \
             -f Dockerfile .
-           
+
+          echo "IMAGE_TAG=$IMAGE_NAME:$APP_VERSION" >> $GITHUB_OUTPUT
+
       - name: Login to Docker Hub
         if: steps.check-branch.outputs.continue == 'true'
         uses: docker/login-action@v3
@@ -68,7 +73,32 @@ jobs:
       - name: Push Docker image
         if: steps.check-branch.outputs.continue == 'true'
         run: |
-          IMAGE_NAME="mobymatze/az-health-exporter"
-          APP_VERSION=${{ github.ref_name }}
+          docker push ${{steps.docker-build.outputs.IMAGE_TAG}}
 
-          docker push "$IMAGE_NAME:$APP_VERSION"
+      - name: Get the image digest
+        id: get-image-digest
+        if: steps.check-branch.outputs.continue == 'true'
+        run: |
+          IMAGE_DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' "${{steps.docker-build.outputs.IMAGE_TAG}}")
+          echo "IMAGE_DIGEST=$IMAGE_DIGEST" >> $GITHUB_OUTPUT
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v4.0.0
+        with:
+          cosign-release: 'v3.0.2'
+
+      - name: Verify Cosign installation
+        run: cosign version
+
+      - name: Sign the Docker image
+        if: steps.check-branch.outputs.continue == 'true'
+        env:
+          COSIGN_PASSWORD: ${{ secrets.COSIGN_KEY_PASSPHRASE }}
+        run: |
+          echo "${{ secrets.COSIGN_PRIVATE_KEY }}" > cosign.key
+          cosign sign --key ./cosign.key ${{steps.get-image-digest.outputs.IMAGE_DIGEST}}
+
+      - name: Verify image signature
+        if: steps.check-branch.outputs.continue == 'true'
+        run: |
+          cosign verify --key ./cosign.pub ${{steps.docker-build.outputs.IMAGE_TAG}}
