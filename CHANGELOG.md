@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [v0.4.2] - 2025-11-12
 
 * Bumps `github.com/AzureAD/microsoft-authentication-library-for-go` from 1.5.0 to 1.6.0 [#8](https://github.com/matzefriedrich/az-health-exporter/pull/8)
+* Bumps `github.com/Azure/azure-sdk-for-go/sdk/azcore` from 1.19.1 to 1.20.0 [#9](https://github.com/matzefriedrich/az-health-exporter/pull/9)
 
 
 ## [v0.4.1] - 2025-11-04
