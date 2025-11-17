@@ -51,24 +51,32 @@ jobs:
 
           APP_RELEASE_DATE=$(date -u +%Y-%m-%d)
           APP_VERSION=${{ github.ref_name }}
+          if [ "${{ github.ref_type }}" == "branch" ]; then
+            APP_VERSION="${GITHUB_SHA::8}"
+          fi
+
           IMAGE_NAME="mobymatze/az-health-exporter"
+          IMAGE_NAME_WITH_TAG="$IMAGE_NAME:$APP_VERSION"
+          echo "qualified_image_tag=$IMAGE_NAME_WITH_TAG" >> $GITHUB_OUTPUT
 
           docker build \
             --build-arg APP_RELEASE_DATE="$APP_RELEASE_DATE" \
             --build-arg APP_RELEASE="$GITHUB_REPOSITORY" \
             --build-arg APP_VERSION="$APP_VERSION" \
             --build-arg CI_COMMIT_SHORT_SHA="$GITHUB_SHA" \
-            -t "$IMAGE_NAME:$APP_VERSION" \
+            -t "$IMAGE_NAME_WITH_TAG" \
             -f Dockerfile .
 
           echo "IMAGE_TAG=$IMAGE_NAME:$APP_VERSION" >> $GITHUB_OUTPUT
 
       - name: Install Cosign
+        if: steps.check-branch.outputs.continue == 'true'
         uses: sigstore/cosign-installer@v4.0.0
         with:
           cosign-release: 'v3.0.2'
 
       - name: Verify Cosign installation
+        if: steps.check-branch.outputs.continue == 'true'
         run: cosign version
 
       - name: Login to Docker Hub
