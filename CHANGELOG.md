@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+* Bumps `github.com/Azure/azure-sdk-for-go/sdk/azidentity` from 1.13.0 to 1.13.1 [#10](https://github.com/matzefriedrich/az-health-exporter/pull/10)
+
+
 ## [v0.4.2] - 2025-11-12
 
 * Bumps `github.com/AzureAD/microsoft-authentication-library-for-go` from 1.5.0 to 1.6.0 [#8](https://github.com/matzefriedrich/az-health-exporter/pull/8)
