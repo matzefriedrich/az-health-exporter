@@ -5,11 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## [v0.4.3] - 2025-12-09
 
 * Bumps `github.com/Azure/azure-sdk-for-go/sdk/azidentity` from 1.13.0 to 1.13.1 [#10](https://github.com/matzefriedrich/az-health-exporter/pull/10)
 * Bumps `github.com/goccy/go-yaml` from 1.18.0 to 1.19.0 [#11](dependabot/go_modules/github.com/goccy/go-yaml-1.19.0)
 * Bumps `github.com/spf13/cobra` from 1.10.1 to 1.10.2 [#12](https://github.com/matzefriedrich/az-health-exporter/pull/12)
+* Upgrades Go version to 1.25.5 [#13](https://github.com/matzefriedrich/az-health-exporter/pull/13)
 
 
 ## [v0.4.2] - 2025-11-12
