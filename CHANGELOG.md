@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * Bumps `github.com/Azure/azure-sdk-for-go/sdk/azidentity` from 1.13.0 to 1.13.1 [#10](https://github.com/matzefriedrich/az-health-exporter/pull/10)
 * Bumps `github.com/goccy/go-yaml` from 1.18.0 to 1.19.0 [#11](dependabot/go_modules/github.com/goccy/go-yaml-1.19.0)
+* Bumps `github.com/spf13/cobra` from 1.10.1 to 1.10.2 [#12](https://github.com/matzefriedrich/az-health-exporter/pull/12)
 
 
 ## [v0.4.2] - 2025-11-12
