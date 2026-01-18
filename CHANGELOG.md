@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [v0.4.5] - 2026-01-18
 
 * Bumps `github.com/goccy/go-yaml` from 1.19.0 to 1.19.2 [#15](https://github.com/matzefriedrich/az-health-exporter/pull/15)
+* Bumps `github.com/matzefriedrich/parsley` from v1.3.0 to v1.3.1
+* Bumps `github.com/Azure/azure-sdk-for-go/sdk/azcore` v1.20.0 to v1.20.1
 
 
 ## [v0.4.4] - 2025-12-09
