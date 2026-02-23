@@ -7,7 +7,7 @@ require (
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.13.1
 	github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcehealth/armresourcehealth v1.3.0
 	github.com/AzureAD/microsoft-authentication-library-for-go v1.6.0
-	github.com/caarlos0/env/v11 v11.3.1
+	github.com/caarlos0/env/v11 v11.4.0
 	github.com/goccy/go-yaml v1.19.2
 	github.com/matzefriedrich/cobra-extensions v0.6.0
 	github.com/matzefriedrich/parsley v1.3.1
