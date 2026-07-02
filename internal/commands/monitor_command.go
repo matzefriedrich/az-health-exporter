@@ -38,11 +38,13 @@ func NewHealthMonitorCommand(
 
 func (m *healthMonitorCommand) Execute(ctx context.Context) {
 
-	healthMonitor := m.healthMonitor.Value()
+	healthMonitor := m.healthMonitor.Value(ctx)
 	go healthMonitor.StartMonitoring(ctx)
 
 	http.HandleFunc("/health", healthCheckHandler)
-	http.HandleFunc("/status", m.statusHandler)
+	http.HandleFunc("/status", func(writer http.ResponseWriter, request *http.Request) {
+		m.statusHandler(ctx, writer, request)
+	})
 	http.Handle("/metrics", promhttp.Handler())
 
 	addr := fmt.Sprintf(":%d", m.Port)
@@ -64,11 +66,11 @@ type statusResponse struct {
 	Resources []*monitor.ResourceHealth `json:"resources"`
 }
 
-func (m *healthMonitorCommand) statusHandler(w http.ResponseWriter, request *http.Request) {
+func (m *healthMonitorCommand) statusHandler(ctx context.Context, w http.ResponseWriter, request *http.Request) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
-	healthMonitor := m.healthMonitor.Value()
+	healthMonitor := m.healthMonitor.Value(ctx)
 
 	statuses := make([]*monitor.ResourceHealth, 0)
 	healthStatus, err := healthMonitor.GetHealthStatus(request.Context())
@@ -90,7 +92,7 @@ func (m *healthMonitorCommand) statusHandler(w http.ResponseWriter, request *htt
 
 func healthCheckHandler(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{
+	_ = json.NewEncoder(w).Encode(map[string]string{
 		"status": "healthy",
 	})
 }
