@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [unreleased]
 
 * Upgrades Go version from 1.25 to 1.26 [#16](https://github.com/matzefriedrich/az-health-exporter/pull/16)
+* Bumps `github.com/AzureAD/microsoft-authentication-library-for-go` from 1.6.0 to 1.7.1 [#20](https://github.com/matzefriedrich/az-health-exporter/pull/20)
 
 
 ## [v0.4.5] - 2026-01-18
