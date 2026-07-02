@@ -113,4 +113,4 @@ azure_resource_health_last_check_timestamp{resource_id="...",resource_name="..."
 
 ---
 
-Copyright 2025 by Matthias Friedrich
+Copyright 2025 - 2026 by Matthias Friedrich

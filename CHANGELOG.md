@@ -5,7 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [unreleased]
+## [v0.4.7] - 2026-07-02
+
+### Added
+
+- Adds a `Makefile` to automate build, test, and Docker image creation tasks.
+
+### Changed
+
+- Bumps `github.com/Azure/azure-sdk-for-go/sdk/azcore` from 1.21.1 to 1.22.0
+- Bumps `github.com/Azure/azure-sdk-for-go/sdk/azidentity` from 1.13.1 to 1.14.0
+- Bumps `github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resourcehealth/armresourcehealth` from 1.3.0 to 1.4.0
+- Bumps `github.com/AzureAD/microsoft-authentication-library-for-go` from 1.7.1 to 1.7.2
+- Bumps `github.com/matzefriedrich/parsley` from 1.4.2 to 1.5.0
+
+
+## [v0.4.6] - 2026-07-02
+
+### Changed
 
 * Upgrades Go version from 1.25 to 1.26 [#16](https://github.com/matzefriedrich/az-health-exporter/pull/16)
 * Bumps `github.com/AzureAD/microsoft-authentication-library-for-go` from 1.6.0 to 1.7.1 [#20](https://github.com/matzefriedrich/az-health-exporter/pull/20)
@@ -17,12 +34,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [v0.4.5] - 2026-01-18
 
+### Changed
+
 * Bumps `github.com/goccy/go-yaml` from 1.19.0 to 1.19.2 [#15](https://github.com/matzefriedrich/az-health-exporter/pull/15)
 * Bumps `github.com/matzefriedrich/parsley` from v1.3.0 to v1.3.1
 * Bumps `github.com/Azure/azure-sdk-for-go/sdk/azcore` v1.20.0 to v1.20.1
 
 
 ## [v0.4.4] - 2025-12-09
+
+### Changed
 
 * Bumps `github.com/Azure/azure-sdk-for-go/sdk/azidentity` from 1.13.0 to 1.13.1 [#10](https://github.com/matzefriedrich/az-health-exporter/pull/10)
 * Bumps `github.com/goccy/go-yaml` from 1.18.0 to 1.19.0 [#11](dependabot/go_modules/github.com/goccy/go-yaml-1.19.0)
@@ -32,11 +53,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [v0.4.2] - 2025-11-12
 
+### Changed
+
 * Bumps `github.com/AzureAD/microsoft-authentication-library-for-go` from 1.5.0 to 1.6.0 [#8](https://github.com/matzefriedrich/az-health-exporter/pull/8)
 * Bumps `github.com/Azure/azure-sdk-for-go/sdk/azcore` from 1.19.1 to 1.20.0 [#9](https://github.com/matzefriedrich/az-health-exporter/pull/9)
 
 
 ## [v0.4.1] - 2025-11-04
+
+### Changed
 
 * Bumps `github.com/matzefriedrich/parsley` from 1.2.1 to 1.3.0 [#7](https://github.com/matzefriedrich/az-health-exporter/pull/7)
 
