@@ -10,7 +10,7 @@ require (
 	github.com/caarlos0/env/v11 v11.4.1
 	github.com/goccy/go-yaml v1.19.2
 	github.com/matzefriedrich/cobra-extensions v0.6.0
-	github.com/matzefriedrich/parsley v1.3.1
+	github.com/matzefriedrich/parsley v1.4.2
 	github.com/prometheus/client_golang v1.23.2
 	github.com/spf13/cobra v1.10.2
 )
